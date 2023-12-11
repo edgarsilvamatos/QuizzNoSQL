@@ -33,46 +33,32 @@ public class App {
 		System.out.println("What is your name?");
 		String name = scanner.nextLine();
 
-		// Choose a category
 		System.out.println("Choose a category:");
 		System.out.println("1. Population");
 		System.out.println("2. Surface Area");
 		System.out.println("3. GDP");
-
-		// Get user choice
 		System.out.print("Enter your choice (1-3): ");
 		int userChoice = scanner.nextInt();
 
-		// Initialize score
 		int score = 0;
-
-		// Record start time
 		long startTime = System.currentTimeMillis();
 
-		// Ask three questions
 		for (int question = 1; question <= 3; question++) {
-			// Display 3 random country names
 			List<String> randomCountryNames = getRandomCountryNames(collection, 3);
 			System.out.println("---");
-			System.out.println("Question " + question + ": Choose the country with the highest " +
+			System.out.println("Question " + question + ": Choose the country with the biggest " +
 					getPropertyDescription(userChoice) + " among the following:");
 
 			for (int i = 0; i < randomCountryNames.size(); i++) {
 				System.out.println((i + 1) + ". " + randomCountryNames.get(i));
 			}
 
-			// Get user choice for the country with the highest property
 			System.out.print("Enter your choice (1-3): ");
 			int userCountryChoice = scanner.nextInt();
 
-			// Get the property value of the chosen country
 			String chosenCountryName = randomCountryNames.get(userCountryChoice - 1);
 			Double chosenPropertyValue = getProperty(collection, chosenCountryName, userChoice);
 
-			// Display property values for each country
-
-
-			// Determine and print the result
 			if (isHighest(chosenPropertyValue, randomCountryNames, collection, userChoice)) {
 				System.out.println(" ");
 				System.out.println("Correct! " + chosenCountryName + " has the highest " +
@@ -93,10 +79,7 @@ public class App {
 			}
 		}
 
-		// Record end time
 		long endTime = System.currentTimeMillis();
-
-		// Calculate elapsed time in seconds
 		long elapsedTime = (endTime - startTime) ;
 
 		Document userResultDocument = new Document()
@@ -105,15 +88,14 @@ public class App {
 				.append("time_taken", elapsedTime);
 		userResultsCollection.insertOne(userResultDocument);
 
-		// Display final score and time
+		System.out.println(" ");
 		System.out.println("======");
 		System.out.println("Quiz completed, " + name + "! Your final score is: " + score);
-		System.out.println("Time taken: " + elapsedTime + " seconds");
+		System.out.println("Time taken: " + elapsedTime + " milliseconds");
 		System.out.println("======");
 
 
-// Display top 3 user results
-		System.out.println("---");
+		System.out.println(" ");
 		System.out.println("Top 3 User Results:");
 
 		List<Document> topUserResults = getTopUserResults(userResultsCollection, 3);
@@ -123,10 +105,10 @@ public class App {
 			int userScore = result.getInteger("score");
 			long userTimeTaken = result.getLong("time_taken");
 
-			System.out.println((i + 1) + ". Username: " + username + ", Score: " + userScore + ", Time Taken: " + userTimeTaken + " seconds");
+			System.out.println((i + 1) + ". Username: " + username + ", Score: "
+					+ userScore + ", Time Taken: " + userTimeTaken + " milliseconds");
 		}
 
-		// Close the scanner to prevent resource leaks
 		scanner.close();
 	}
 
@@ -136,7 +118,6 @@ public class App {
 		return topUserResults;
 	}
 
-	// Helper method to get random country names from the collection
 	private static List<String> getRandomCountryNames(MongoCollection<Document> collection, int count) {
 		List<String> countryNames = new ArrayList<>();
 		MongoIterable<String> allCountryNames = collection.distinct("name", String.class);
@@ -154,7 +135,6 @@ public class App {
 		return randomCountryNames;
 	}
 
-	// Helper method to get the property value for a specific country
 	private static Double getProperty(MongoCollection<Document> collection, String countryName, int userChoice) {
 		Document document = collection.find(new Document("name", countryName)).first();
 		if (document != null) {
@@ -172,7 +152,6 @@ public class App {
 		return 0.0;
 	}
 
-	// Helper method to check if the chosen country has the highest property value among the random countries
 	private static boolean isHighest(Double chosenPropertyValue, List<String> randomCountryNames,
 									 MongoCollection<Document> collection, int userChoice) {
 		for (String countryName : randomCountryNames) {
@@ -184,7 +163,6 @@ public class App {
 		return true;
 	}
 
-	// Helper method to get property description based on user choice
 	private static String getPropertyDescription(int userChoice) {
 		switch (userChoice) {
 			case 1:
@@ -196,16 +174,6 @@ public class App {
 			default:
 				return "";
 		}
-	}
-
-	// Helper method to map a Document to the Country class
-	private static Country mapDocumentToCountry(Document document) {
-		return new Country(
-				document.getString("name"),
-				document.getDouble("population"),
-				document.getDouble("surface_area"),
-				document.getDouble("gdp")
-		);
 	}
 }
 
